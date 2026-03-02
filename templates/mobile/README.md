@@ -34,4 +34,4 @@ npx expo start
 Use the Expo Go app on your physical device, or press `i` to open an iOS simulator, and `a` for an Android emulator.
 
 ---
-*Built effortlessly with [VibeCodex](https://github.com/your-repo/vibecodex).*
+*Built effortlessly with [@kunal-shetty/vibecodex](https://www.npmjs.com/package/@kunal-shetty/vibecodex).*

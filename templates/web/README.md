@@ -34,4 +34,4 @@ npm run dev
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 ---
-*Built effortlessly with [VibeCodex](https://github.com/your-repo/vibecodex).*
+*Built effortlessly with [@kunal-shetty/vibecodex](https://www.npmjs.com/package/@kunal-shetty/vibecodex).*

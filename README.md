@@ -21,13 +21,13 @@ VibeCodex is a premium CLI tool that takes the busywork out of setting up modern
 Install globally via npm for easy reuse:
 
 ```bash
-npm install -g vibecodex
+npm install -g @kunal-shetty/vibecodex
 ```
 
 Or run it directly using `npx` without installing:
 
 ```bash
-npx vibecodex
+npx @kunal-shetty/vibecodex
 ```
 
 ## Usage
@@ -35,7 +35,7 @@ npx vibecodex
 Simply run:
 
 ```bash
-vibecodex
+npx @kunal-shetty/vibecodex
 ```
 
 The beautiful animated CLI will guide you through:

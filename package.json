@@ -1,12 +1,32 @@
 {
-  "name": "vibecodex",
+  "name": "@kunal-shetty/vibecodex",
   "version": "3.0.0",
   "description": "🚀 Full-stack app generator — Next.js + Expo + Supabase",
   "bin": {
-    "vibecodex": "./bin/index.js",
-    "vibecode": "./bin/index.js"
+    "vibecodex": "bin/index.js",
+    "vibecode": "bin/index.js"
   },
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kunal-shetty/vibecodex.git"
+  },
+  "keywords": [
+    "cli",
+    "generator",
+    "nextjs",
+    "expo",
+    "react-native",
+    "supabase",
+    "vercel",
+    "full-stack"
+  ],
+  "author": "Kunal Shetty",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kunal-shetty/vibecodex/issues"
+  },
+  "homepage": "https://github.com/kunal-shetty/vibecodex#readme",
   "dependencies": {
     "boxen": "^7.1.1",
     "chalk": "^5.3.0",
