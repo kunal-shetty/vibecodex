@@ -18,65 +18,91 @@ export async function run(answers) {
   console.log();
   ui.section(`Creating "${name}" — ${isWeb ? "Next.js Web App" : "Expo Mobile App"}`);
 
-  // ─────────────────────────────────────────────────────────────────────────
+  // ─────────────────────────────────────────
   // STEP 1 — Create project
-  // ─────────────────────────────────────────────────────────────────────────
+  // ─────────────────────────────────────────
   ui.start(isWeb ? "Running create-next-app..." : "Running create-expo-app...", true);
+
   try {
     if (isWeb) {
       await execa("npx", [
-        "create-next-app@latest", name,
-        "--typescript", "--app", "--tailwind", "--eslint", "--yes",
+        "create-next-app@latest",
+        name,
+        "--typescript",
+        "--app",
+        "--tailwind",
+        "--eslint",
+        "--yes",
       ]);
     } else {
       await execa("npx", [
-        "create-expo-app@latest", name,
-        "--template", "blank-typescript",
+        "create-expo-app@latest",
+        name,
+        "--template",
+        "blank-typescript",
       ]);
     }
-    ui.succeed(isWeb ? "Next.js project created!" : "Expo project created!");
+    ui.succeed("Project created!");
   } catch (err) {
     ui.fail("Project creation failed.");
     ui.dim(err.message);
     process.exit(1);
   }
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // STEP 2 — Provision Supabase project
-  // ─────────────────────────────────────────────────────────────────────────
-  ui.start("Provisioning Supabase project (this takes ~60s)...");
+  // ─────────────────────────────────────────
+  // STEP 2 — Supabase (OPTIONAL)
+  // ─────────────────────────────────────────
   let supabase = null;
-  try {
-    supabase = await createSupabaseProject(
-      answers.supabaseToken,
-      answers.supabaseOrgId,
-      name
-    );
-    ui.succeed(`Supabase ready! → ${supabase.url}`);
-  } catch (err) {
-    ui.warn("Supabase provisioning failed — you'll need to add credentials manually.");
-    ui.dim(err.message);
+
+  if (answers.useSupabase) {
+    ui.start("Provisioning Supabase project...");
+    try {
+      supabase = await createSupabaseProject(
+        answers.supabaseToken,
+        answers.supabaseOrgId,
+        name
+      );
+      ui.succeed(`Supabase ready → ${supabase.url}`);
+    } catch (err) {
+      ui.warn("Supabase provisioning failed.");
+      ui.dim(err.message);
+    }
   }
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // STEP 3 — Install dependencies
-  // ─────────────────────────────────────────────────────────────────────────
-  ui.start("Installing Supabase packages...", true);
-  try {
-    const pkgs = isWeb
-      ? ["@supabase/ssr", "@supabase/supabase-js", "@google/generative-ai", "resend"]
-      : ["@supabase/supabase-js"];
-    await execa("npm", ["install", ...pkgs], { cwd: projectPath });
-    ui.succeed("Packages installed!");
-  } catch (err) {
-    ui.warn("Some packages failed to install.");
-    ui.dim(err.message);
+  // ─────────────────────────────────────────
+  // STEP 3 — Install packages (only if needed)
+  // ─────────────────────────────────────────
+  if (answers.useSupabase || isWeb) {
+    ui.start("Installing dependencies...", true);
+
+    try {
+      const pkgs = [];
+
+      if (answers.useSupabase) {
+        pkgs.push("@supabase/supabase-js");
+        if (isWeb) pkgs.push("@supabase/ssr");
+      }
+
+      if (isWeb) {
+        pkgs.push("@google/generative-ai", "resend");
+      }
+
+      if (pkgs.length > 0) {
+        await execa("npm", ["install", ...pkgs], { cwd: projectPath });
+      }
+
+      ui.succeed("Dependencies installed!");
+    } catch (err) {
+      ui.warn("Dependency installation failed.");
+      ui.dim(err.message);
+    }
   }
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // STEP 4 — Copy templates
-  // ─────────────────────────────────────────────────────────────────────────
+  // ─────────────────────────────────────────
+  // STEP 4 — Inject templates
+  // ─────────────────────────────────────────
   ui.start("Injecting boilerplate templates...");
+
   try {
     const tplDir = path.join(TEMPLATES_ROOT, isWeb ? "web" : "mobile");
     if (fs.existsSync(tplDir)) {
@@ -84,96 +110,115 @@ export async function run(answers) {
     }
     ui.succeed("Templates injected!");
   } catch (err) {
-    ui.warn("Template injection issue (non-critical).");
-    ui.dim(err.message);
+    ui.warn("Template injection issue.");
   }
 
-  // Expo: update tab layout
   if (!isWeb) {
-    try { await setupExpoTabs(projectPath); } catch (_) {}
+    try { await setupExpoTabs(projectPath); } catch {}
   }
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // STEP 5 — Write .env files
-  // ─────────────────────────────────────────────────────────────────────────
+  // ─────────────────────────────────────────
+  // STEP 5 — Write env files
+  // ─────────────────────────────────────────
   ui.start("Writing environment files...");
   try {
     writeEnv(projectPath, isWeb, supabase);
-    ui.succeed(".env.local + .env.example written!");
-  } catch (err) {
+    ui.succeed(".env files created!");
+  } catch {
     ui.warn("Env file error.");
   }
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // STEP 6 — Git init + GitHub push
-  // ─────────────────────────────────────────────────────────────────────────
-  ui.start("Creating private GitHub repo and pushing...", true);
+  // ─────────────────────────────────────────
+  // STEP 6 — GitHub (OPTIONAL)
+  // ─────────────────────────────────────────
   let repoUrl = null;
-  try {
-    repoUrl = await createAndPush(
-      projectPath, name,
-      answers.githubUsername,
-      answers.githubToken
-    );
-    ui.succeed(`Pushed to GitHub → ${repoUrl}`);
-  } catch (err) {
-    ui.warn("GitHub push failed.");
-    ui.dim(err.message);
-  }
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // STEP 7 — Vercel deploy (web only)
-  // ─────────────────────────────────────────────────────────────────────────
-  let liveUrl = null;
-  if (isWeb && answers.deployVercel && answers.vercelToken) {
-    ui.start("Deploying to Vercel from GitHub...", true);
+  if (answers.useGithub) {
+    ui.start("Creating GitHub repo & pushing...", true);
+
     try {
-      const envVars = supabase ? {
-        NEXT_PUBLIC_SUPABASE_URL: supabase.url,
-        NEXT_PUBLIC_SUPABASE_ANON_KEY: supabase.anonKey,
-      } : {};
-
-      liveUrl = await deployFromGitHub(
-        answers.vercelToken,
-        answers.githubUsername,
+      repoUrl = await createAndPush(
+        projectPath,
         name,
-        envVars
+        answers.githubUsername,
+        answers.githubToken
       );
-      ui.succeed(`Live on Vercel → ${liveUrl}`);
+      ui.succeed(`Pushed → ${repoUrl}`);
     } catch (err) {
-      ui.warn("Vercel deploy failed.");
+      ui.warn("GitHub push failed.");
       ui.dim(err.message);
     }
   }
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // STEP 8 — Summary + open browser + start dev server
-  // ─────────────────────────────────────────────────────────────────────────
+  // ─────────────────────────────────────────
+  // STEP 7 — Vercel (OPTIONAL + depends on GitHub)
+  // ─────────────────────────────────────────
+  let liveUrl = null;
+
+  if (isWeb && answers.deployVercel) {
+    if (!answers.useGithub) {
+      ui.warn("Vercel deployment requires GitHub repo. Skipping.");
+    } else {
+      ui.start("Deploying to Vercel...", true);
+
+      try {
+        const envVars = supabase
+          ? {
+              NEXT_PUBLIC_SUPABASE_URL: supabase.url,
+              NEXT_PUBLIC_SUPABASE_ANON_KEY: supabase.anonKey,
+            }
+          : {};
+
+        liveUrl = await deployFromGitHub(
+          answers.vercelToken,
+          answers.githubUsername,
+          name,
+          envVars
+        );
+
+        ui.succeed(`Live → ${liveUrl}`);
+      } catch (err) {
+        ui.warn("Vercel deploy failed.");
+        ui.dim(err.message);
+      }
+    }
+  }
+
+  // ─────────────────────────────────────────
+  // STEP 8 — Summary
+  // ─────────────────────────────────────────
   const summary = {
-    "Project":   name,
-    "Platform":  isWeb ? "Next.js Web App" : "Expo Mobile App",
-    "Database":  supabase ? `Supabase (${supabase.url})` : "Supabase (manual setup needed)",
-    "GitHub":    repoUrl || "—",
-    "Live URL":  liveUrl || (isWeb ? "Run npm run dev" : "Run expo start"),
+    Project: name,
+    Platform: isWeb ? "Next.js Web App" : "Expo Mobile App",
+    Supabase: answers.useSupabase ? "Enabled" : "Skipped",
+    GitHub: repoUrl || "Skipped",
+    Vercel: liveUrl || (answers.deployVercel ? "Failed" : "Skipped"),
   };
+
   ui.done(summary);
 
-  // Open live URL in Chrome if deployed, otherwise wait for dev server
+  // ─────────────────────────────────────────
+  // STEP 9 — Start dev server
+  // ─────────────────────────────────────────
   if (liveUrl) {
     await openChrome(liveUrl);
   }
 
-  // Start dev server
   if (isWeb) {
-    ui.section("Starting Next.js dev server on http://localhost:3000 ...");
+    ui.section("Starting Next.js dev server...");
     if (!liveUrl) {
-      // Open browser after 4s once server is up
       setTimeout(() => openChrome("http://localhost:3000"), 4000);
     }
-    await execa("npm", ["run", "dev"], { cwd: projectPath, stdio: "inherit" });
+    await execa("npm", ["run", "dev"], {
+      cwd: projectPath,
+      stdio: "inherit",
+    });
   } else {
     ui.section("Starting Expo...");
-    await execa("npx", ["expo", "start"], { cwd: projectPath, stdio: "inherit" });
+    await execa("npx", ["expo", "start"], {
+      cwd: projectPath,
+      stdio: "inherit",
+    });
   }
 }
 
