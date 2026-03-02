@@ -1,6 +1,6 @@
 {
   "name": "@kunal-shetty/vibecodex",
-  "version": "3.0.2",
+  "version": "3.0.3",
   "description": "🚀 Full-stack app generator — Next.js + Expo + Supabase",
   "bin": {
     "vibecodex": "bin/index.js",
