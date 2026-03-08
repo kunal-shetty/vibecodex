@@ -1,57 +1,66 @@
-import { delay, retry } from "../utils.js";
+import { retry, sleep } from "../utils.js";
 
-const API = "https://api.supabase.com/v1";
+const API = "https://api.supabase.com";
 
-export async function createSupabaseProject(token, orgId, name) {
-  const headers = {
-    Authorization: `Bearer ${token}`,
-    "Content-Type": "application/json",
-  };
+export async function createProject(token, orgId, projectName) {
+  const dbPassword = generateDbPassword();
 
-  // 1. Create project
-  const createRes = await retry(async () => {
-    const r = await fetch(`${API}/projects`, {
+  const project = await retry(async () => {
+    const r = await fetch(`${API}/v1/projects`, {
       method: "POST",
-      headers,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({
-        name,
+        name: projectName,
         organization_id: orgId,
-        region: "ap-south-1",
-        db_pass: genPassword(),
+        db_pass: dbPassword,
+        region: "us-east-1",
         plan: "free",
       }),
     });
     const data = await r.json();
-    if (!r.ok) throw new Error(data.message || "Supabase API error");
+    if (!r.ok) throw new Error(data.message || "Supabase project creation failed");
     return data;
   });
 
-  const projectRef = createRes.ref || createRes.id;
+  // Wait for project to become active (can take 30-90 seconds)
+  let projectRef = project.ref || project.id;
+  let apiUrl = null;
+  let anonKey = null;
 
-  // 2. Poll until ACTIVE_HEALTHY (can take 30–90s)
-  for (let i = 0; i < 40; i++) {
-    await delay(4000);
-    const r = await fetch(`${API}/projects/${projectRef}`, { headers });
-    const data = await r.json();
-    if (data.status === "ACTIVE_HEALTHY") break;
-    if (i === 39) throw new Error("Supabase project took too long. Check dashboard.");
+  for (let i = 0; i < 24; i++) {
+    await sleep(5000);
+    try {
+      const r = await fetch(`${API}/v1/projects/${projectRef}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await r.json();
+      if (data.status === "ACTIVE_HEALTHY") {
+        apiUrl = `https://${projectRef}.supabase.co`;
+        // Fetch API keys
+        const keysRes = await fetch(`${API}/v1/projects/${projectRef}/api-keys`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const keys = await keysRes.json();
+        anonKey = keys.find?.((k) => k.name === "anon")?.api_key || keys.anon;
+        break;
+      }
+    } catch {
+      // still booting, continue polling
+    }
   }
 
-  // 3. Get anon key
-  const keysRes = await fetch(`${API}/projects/${projectRef}/api-keys`, { headers });
-  const keys = await keysRes.json();
-  const anonKey = Array.isArray(keys)
-    ? keys.find((k) => k.name === "anon")?.api_key
-    : null;
-
   return {
-    url: `https://${projectRef}.supabase.co`,
+    projectRef,
+    apiUrl: apiUrl || `https://${projectRef}.supabase.co`,
     anonKey: anonKey || "",
-    ref: projectRef,
+    dbPassword,
   };
 }
 
-function genPassword() {
-  const c = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$";
-  return Array.from({ length: 24 }, () => c[Math.floor(Math.random() * c.length)]).join("");
+function generateDbPassword() {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$";
+  return Array.from({ length: 24 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
 }

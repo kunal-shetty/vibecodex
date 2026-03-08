@@ -1,69 +1,88 @@
-# VibeCodex
+# ⚡ VibeCodex
 
-🚀 **Full-Stack App Generator** — Instantly scaffold production-ready applications with Next.js, Expo, Supabase, and Vercel.
+> **Full-Stack App Generator** — scaffold production-ready apps in seconds.
 
-VibeCodex is a premium CLI tool that takes the busywork out of setting up modern full-stack web and mobile projects. With a single command, you get an integrated, fully functional application complete with authentication, database configurations, and deployment automation.
+[![npm](https://img.shields.io/npm/v/vibecodex.svg)](https://www.npmjs.com/package/vibecodex)
+[![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg)](https://nodejs.org/)
 
-## Features
+## What's new in v4.0
 
-- **Next.js Web Apps**: Modern App Router, TailwindCSS, Supabase Auth integrations, and one-click Vercel automated deployment.
-- **Expo Mobile Apps**: React Native powered by Expo Router, complete with Supabase Auth, protected routes, and tab navigation.
-- **Supabase Integration**: Out-of-the-box configuration for your Postgres database, Auth, and RLS policies.
-- **GitHub Automation**: Automatically initializes a Git repository, creates initial commits, and pushes your code seamlessly to GitHub.
-- **Vercel Automation**: (Web only) Creates a Vercel project and deploys your front-end instantly.
-- **Beautiful Interface**: Enjoy a smooth, rainbow-animated terminal experience that is visually stunning.
-- **AI Prompts Included**: Includes premade `.agents/prompts` to accelerate your ongoing development.
+- **8 web templates** (up from 2)
+- **6 mobile templates** (up from 1)
+- **Modular features** — pick only what you need (Supabase, GitHub, Vercel)
+- **Improved CLI** with progress bars, step tracking, and confirmation screen
+- **Complete Supabase schemas** included in every template
+- **Real working UI** — every template ships with full screen components, not just skeletons
 
----
-
-## Installation
-
-Install globally via npm for easy reuse:
+## Quick Start
 
 ```bash
-npm install -g @kunal-shetty/vibecodex
+npx vibecodex
 ```
 
-Or run it directly using `npx` without installing:
+> Requires Node.js 18+
+
+## Templates
+
+### 🌐 Web (Next.js 14 · App Router · Tailwind · TypeScript)
+
+| Template | Description | Includes |
+|----------|-------------|---------|
+| **SaaS Starter** | Full auth + dashboard | Login, signup, dashboard, pricing page, Supabase profiles |
+| **AI Chat App** | OpenAI chat interface | Streaming-ready chat UI, `/api/chat` route, history schema |
+| **E-commerce Store** | Product listings + cart | Product grid, cart page, Stripe-ready, orders schema |
+| **Blog / CMS** | MDX-ready blog | Post listing, post detail, admin schema, comments |
+| **Social Platform** | Twitter-like feed | Feed, compose, profile, follows/likes schema, realtime-ready |
+| **Portfolio** | Developer portfolio | Hero, skills cloud, projects grid |
+| **Analytics Dashboard** | KPI dashboard | Stat cards, chart placeholders, events schema |
+| **Blank Next.js** | Clean slate | App Router + Tailwind + Supabase client wired up |
+
+### 📱 Mobile (Expo 51 · React Native · Expo Router)
+
+| Template | Description | Includes |
+|----------|-------------|---------|
+| **Social Media App** | Feed + profiles | Post feed, compose, profile tab, Supabase auth |
+| **Fitness Tracker** | Workout planner | Today screen, workout cards, progress ring |
+| **Task Manager** | To-do with priorities | Interactive task list, add/toggle, priority badges |
+| **Food Delivery** | Restaurant browsing | Home feed, categories, restaurant cards |
+| **AI Assistant** | Mobile chat bot | Chat UI, keyboard-aware, API-ready |
+| **Blank Expo App** | Clean slate | Expo Router + Supabase client wired up |
+
+## What gets generated
+
+Every project comes with:
+
+- ✅ Full project structure ready to `npm install`
+- ✅ TypeScript configured
+- ✅ Supabase client (browser + server for web, AsyncStorage for mobile)
+- ✅ `.env.local` / `.env` with your real credentials (if provided)
+- ✅ `.env.local.example` for teammates
+- ✅ `supabase/schema.sql` — copy-paste into your Supabase SQL editor
+- ✅ `.gitignore` with secrets excluded
+- ✅ `README.md` with setup instructions
+- ✅ Optional: GitHub repo created & pushed
+- ✅ Optional: Vercel deployment triggered (web only)
+
+## Credentials needed
+
+You only need the credentials for features you select:
+
+| Feature | Where to get it |
+|---------|----------------|
+| Supabase Token | [dashboard.supabase.com/account/tokens](https://dashboard.supabase.com/account/tokens) |
+| Supabase Org ID | Dashboard → Settings → General |
+| GitHub Token | [github.com/settings/tokens](https://github.com/settings/tokens) — needs `repo` scope |
+| Vercel Token | [vercel.com/account/tokens](https://vercel.com/account/tokens) |
+
+## Development
 
 ```bash
-npx @kunal-shetty/vibecodex
+git clone https://github.com/kunal-shetty/vibecodex
+cd vibecodex
+npm install
+node bin/index.js
 ```
-
-## Usage
-
-Simply run:
-
-```bash
-npx @kunal-shetty/vibecodex
-```
-
-The beautiful animated CLI will guide you through:
-1. Entering your **Project Name**.
-2. Choosing your **Platform** (Next.js Web App or Expo Mobile App).
-3. Providing your **Supabase Access Token** and **Org ID**.
-4. Providing your **GitHub Username** and **Token**.
-5. *(Optional)* Setting up **Vercel Deployment** (for web apps only).
-
-Follow the interactive terminal prompts, and let VibeCodex configure everything for you.
-
----
-
-## Prerequisites
-
-Before running the CLI, make sure you have the following credentials ready:
-- **Supabase Access Token**: Go to `supabase.com/dashboard/account/tokens` to generate one.
-- **Supabase Org ID**: Go to `supabase.com/dashboard/org` → Settings → General.
-- **GitHub Classic Token**: Go to `github.com/settings/tokens` (Requires `repo` and `delete_repo` scopes).
-- **Vercel Token** (optional): Go to `vercel.com/account/tokens` to deploy web apps.
-
----
-
-## Structure Generated
-VibeCodex sets up full repositories with optimal directory structures.
-Web Apps feature top-tier layout patterns, components, and Tailwind styles.
-Mobile Apps feature full Expo tab routing, `(auth)` layouts, and safe areas.
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+MIT © [kunal-shetty](https://github.com/kunal-shetty)
