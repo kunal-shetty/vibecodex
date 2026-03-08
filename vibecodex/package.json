@@ -1,0 +1,29 @@
+{
+  "name": "vibecodex",
+  "version": "4.0.0",
+  "description": "⚡ Full-Stack App Generator — Next.js · Expo · Supabase · GitHub · Vercel",
+  "type": "module",
+  "bin": {
+    "vibecodex": "./bin/index.js"
+  },
+  "scripts": {
+    "start": "node bin/index.js"
+  },
+  "dependencies": {
+    "inquirer": "^9.3.7",
+    "figlet": "^1.7.0",
+    "gradient-string": "^2.0.2",
+    "boxen": "^7.1.1",
+    "chalk": "^5.3.0",
+    "ora": "^8.0.1",
+    "execa": "^8.0.1",
+    "degit": "^2.8.4",
+    "fs-extra": "^11.2.0"
+  },
+  "keywords": ["cli", "nextjs", "expo", "supabase", "vercel", "scaffold", "template"],
+  "author": "kunal-shetty",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
