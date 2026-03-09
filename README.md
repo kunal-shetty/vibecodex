@@ -2,10 +2,10 @@
 
 > **Full-Stack App Generator** — scaffold production-ready apps in seconds.
 
-[![npm](https://img.shields.io/npm/v/vibecodex.svg)](https://www.npmjs.com/package/vibecodex)
+[![npm](https://img.shields.io/npm/v/vibecodex.svg)](https://www.npmjs.com/package/@kunal-shetty/vibecodex)
 [![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen.svg)](https://nodejs.org/)
 
-## What's new in v4.0
+## What's new in v5.0
 
 - **8 web templates** (up from 2)
 - **6 mobile templates** (up from 1)
@@ -17,7 +17,7 @@
 ## Quick Start
 
 ```bash
-npx vibecodex
+npx @kunal-shetty/vibecodex
 ```
 
 > Requires Node.js 18+
